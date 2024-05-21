@@ -1,0 +1,38 @@
+name: Update test_sg on model_b changes
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update-test-sg:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout test_sg
+      uses: actions/checkout@v2
+      with:
+        repository: sravangorati2001/test-sg
+        token: ${{ secrets.GH_TOKEN }}
+        submodules: true
+        path: test-sg
+
+    - name: Checkout model_b
+      run: |
+        cd test-sg
+        git submodule update --remote model_b
+
+    - name: Configure Git User
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+    - name: Commit and Push Changes
+      run: |
+        cd test-sg
+        git add model_b
+        git commit -m "Update model_a submodule to latest commit"
+        git push https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/sravangorati2001/test-sg.git main
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
